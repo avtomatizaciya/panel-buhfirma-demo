@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Панель бухфирмы</title><style>
+:root{--plane:#f6f4ee;--surface:#fffdf8;--ink:#16231c;--ink2:#4b5750;--muted:#757c75;--grid:#e6e2d6;--axis:#c9c4b4;--ring:rgba(22,35,28,.13);
+--s1:#1f5a42;--gold:#b98a1d;--good:#2f8f57;--critical:#c0392f;--warn:#d08c10;--ctx:#a3a498;
+--crit-wash:#fbe9e6;--warn-wash:#f8f0da;--good-wash:#e6f2e8;--info-wash:#eaf0e8;
+--h0:#eeeadd;--h1:#d7e5cd;--h2:#a9cfa6;--h3:#6fb07f;--h4:#3a8458;--h5:#1d5a3f;--c2:#4a7c96}
+@media (prefers-color-scheme:dark){:root{--plane:#0f1512;--surface:#172019;--ink:#eef2ec;--ink2:#bcc6bd;--muted:#8d988f;--grid:#26322a;--axis:#3a483f;--ring:rgba(255,255,255,.12);
+--s1:#5fbf8a;--gold:#e0b84a;--good:#4cc27a;--critical:#ef6a5e;--warn:#e0a73a;--ctx:#8a948c;--crit-wash:#2a1816;--warn-wash:#2a2412;--good-wash:#13251a;--info-wash:#16241c;
+--h0:#1e2822;--h1:#23402f;--h2:#2d6143;--h3:#3f8a5c;--h4:#62b583;--h5:#9be0b5;--c2:#7db3d1}}
+*{box-sizing:border-box}html,body{margin:0}html{-webkit-text-size-adjust:100%}
+body{background:var(--plane);color:var(--ink);font:15px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{max-width:1280px;margin:0 auto;padding:10px 12px 12px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;gap:8px}
+input.pick{position:absolute;opacity:0;pointer-events:none}
+.s-red{--st:var(--critical);--wash:var(--crit-wash)}.s-amb{--st:var(--warn);--wash:var(--warn-wash)}.s-grn{--st:var(--good);--wash:var(--good-wash)}.s-neu{--st:var(--ink2);--wash:var(--surface)}
+.top5{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.top5 h1{font-family:Georgia,'Times New Roman',serif;font-size:19px;margin:0;line-height:1.2}
+.stamp{font-size:14px;font-weight:600;margin-right:auto}
+.chip{font-size:13px;padding:3px 10px;border:1px solid var(--ring);border-radius:999px;background:var(--surface);color:var(--ink2)}
+.verdict{margin:0;padding:8px 12px;background:var(--surface);border:1px solid var(--ring);border-left:5px solid var(--critical);border-radius:10px;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.3}
+.grid{flex:1;display:grid;gap:10px;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
+.grid>.t:nth-child(-n+4){grid-column:span 3}.grid>.t:nth-child(n+5){grid-column:span 4}
+.t{margin:0;background:var(--surface);border:1px solid var(--ring);border-left:5px solid var(--st);border-radius:12px;min-width:0;height:100%;display:flex;flex-direction:column}
+.t .face{cursor:pointer;display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:3px;padding:10px 12px;flex:1 1 auto;min-height:0;border-radius:inherit}
+.t .face:hover{background:var(--wash);box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.t>.inner{display:none}
+.tq{display:flex;justify-content:space-between;align-items:center;font-size:14.5px;font-weight:700;color:var(--ink2)}
+.go{font-style:normal;flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--st);color:var(--st);background:var(--wash);display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1;padding-bottom:2px}
+.t .face:hover .go{background:var(--st);color:var(--surface)}
+.tn{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 6px}
+.tn b{font-family:Georgia,'Times New Roman',serif;font-size:36px;line-height:1.1;font-weight:700}
+.tn small{font-size:15px;color:var(--ink2);font-weight:600}
+.ar{font-style:normal;font-size:14px;font-weight:700;margin-left:auto;white-space:nowrap}
+.ar.warn{color:var(--warn)}.ar.good{color:var(--good)}.ar.bad{color:var(--critical)}.ar.flat{color:var(--ink2)}
+.mini{display:block;width:100%;height:auto;flex:1 1 46px;min-height:46px;max-height:170px;margin:4px 0}
+.mini *{vector-effect:non-scaling-stroke}
+.mini .g{fill:var(--good)}.mini .c{fill:var(--ctx)}.mini .r{fill:var(--critical)}
+.mini .h0{fill:var(--h0)}.mini .h1{fill:var(--h1)}.mini .h2{fill:var(--h2)}.mini .h3{fill:var(--h3)}.mini .h4{fill:var(--h4)}.mini .h5{fill:var(--h5)}
+.mini .pa{fill:var(--info-wash);stroke:none}.mini .pl{fill:none;stroke:var(--s1);stroke-width:2}.mini .dsh{stroke:var(--ctx);stroke-width:1;stroke-dasharray:4 3}
+.mapx{position:relative;display:block;flex:1 1 60px;min-height:46px;margin:4px 0}
+.mapx i{position:absolute;box-sizing:border-box;border:1.5px solid var(--surface);border-radius:5px;font-style:normal;overflow:hidden;color:#fff}
+.mapx b{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;padding:3px 5px;font-size:11.5px;font-weight:700;line-height:1.15;overflow:hidden;overflow-wrap:anywhere}
+.mapx .md2{background:#c0392f}.mapx .wa{background:#d08c10;color:#2b1d00}.mapx .mf{background:#cbc7b8;color:#2b2b26}
+.mini.blocks{display:flex;gap:6px;align-items:stretch;max-height:80px}
+.blocks .b{flex:1 1 0;display:flex;align-items:center;justify-content:center;border-radius:8px;font-style:normal;font-weight:700;font-size:17px;color:#fff;min-width:0}
+.blocks .b.crit{background:var(--critical)}.blocks .b.warn{background:var(--warn)}
+.dots{display:flex;gap:10px;align-items:flex-end;flex:1 1 46px;min-height:46px;margin:4px 0}
+.dg{display:flex;flex-wrap:wrap;gap:3px;align-content:flex-end;min-width:16px}
+.dt{width:20px;height:20px;border-radius:4px;background:var(--ctx)}
+.dt.ok{background:var(--good)}.dt.mid{background:var(--warn)}.dt.old{background:var(--ctx)}.dt.no{background:transparent;border:1.5px dashed var(--ctx)}
+.tl{display:block;font-size:14.5px;line-height:1.35;color:var(--ink2)}.tl>span{display:block}.urg{color:var(--critical)}
+/* раскрытие */
+.back{display:inline-block;cursor:pointer;padding:5px 12px;border:1px solid var(--ring);border-radius:999px;background:var(--surface);font-size:14px;margin-bottom:6px}
+.back:hover{background:var(--grid)}
+.inner h2{font-family:Georgia,serif;font-size:21px;margin:4px 0 6px}
+.inner{padding:10px 14px 16px;overflow:auto}
+.cap{font-size:14px;color:var(--ink2);margin:0 0 10px}.mut{color:var(--muted);font-size:13px}
+.note{background:var(--plane);border-left:3px solid var(--axis);border-radius:0 8px 8px 0;padding:8px 12px;margin:6px 0;font-size:14px;color:var(--ink2)}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:6px 0}th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--grid)}
+th{color:var(--ink2);font-size:13px}.r{text-align:right;font-variant-numeric:tabular-nums}tr.dim td{color:var(--muted)}
+details.sub{border:1px solid var(--ring);border-radius:10px;margin:8px 0;background:var(--surface)}
+details.sub>summary{padding:10px 12px;cursor:pointer;font-weight:600;list-style:none}details.sub>summary::-webkit-details-marker{display:none}
+details.sub>summary::before{content:"\25B8";display:inline-block;width:1.1em;color:var(--s1)}details.sub[open]>summary::before{content:"\25BE"}
+details.sub>.inner{padding:2px 12px 12px;overflow:visible}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;margin-right:6px;color:#fff}.badge.crit{background:var(--critical)}.badge.warn{background:#c58a00}
+details.sub2,.sub2.flat{border-top:1px solid var(--grid)}
+details.sub2>summary,.sub2.flat>summary{display:grid;grid-template-columns:minmax(110px,34%) 1fr auto;gap:10px;align-items:center;list-style:none;padding:8px 2px;cursor:pointer;font-size:14px}
+details.sub2>summary::-webkit-details-marker{display:none}.sub2.flat>summary{cursor:default}
+.rb{display:block;background:var(--grid);border-radius:4px;height:14px;overflow:hidden}.rb i{display:block;height:100%;background:var(--s1)}
+.rb i.md2b{background:var(--critical)}.rb i.wab{background:var(--warn)}.rb i.mfb{background:var(--ctx)}
+.rb.stk{display:flex;background:none}.rb.stk i{height:14px}.rb.stk .g,.lg .g{background:var(--good)}.rb.stk .c,.lg .c{background:var(--ctx)}.rb.stk .r,.lg .r{background:var(--critical)}
+.rv{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+details.sub2>.inner{padding:0 2px 10px;overflow:visible}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2);margin:8px 0}.lg span{display:inline-flex;align-items:center;gap:5px}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px}
+table.cal{table-layout:fixed;border-collapse:separate;border-spacing:1px}table.cal th{border:0;padding:0;font-size:11px;text-align:left;white-space:nowrap}
+table.cal th.dn{text-align:center;overflow:visible}table.cal td{border:0;padding:0;height:20px;border-radius:2px}
+table.cal td.h0{background:var(--h0)}table.cal td.h1{background:var(--h1)}table.cal td.h2{background:var(--h2)}table.cal td.h3{background:var(--h3)}table.cal td.h4{background:var(--h4)}table.cal td.h5{background:var(--h5)}
+.foot{font-size:12.5px;color:var(--muted)}
+@media (max-width:820px){
+.app{padding:8px 10px 10px;gap:6px}.top5 h1{font-size:17px}.stamp{font-size:12.5px}
+.verdict{font-size:14.5px;padding:6px 10px}.chip{display:none}.dt{width:13px;height:13px;border-radius:3px}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:8px}
+.grid>.t:nth-child(n){grid-column:span 1}.grid>.t:nth-child(7){grid-column:span 2}
+.t .face{padding:7px 8px;gap:2px}.tq{font-size:13px}.go{font-size:17px}.tn b{font-size:24px}.tn small{font-size:12.5px}.ar{font-size:12.5px}
+.mini,.mapx,.dots{flex:1 1 34px;min-height:34px;max-height:56px;margin:1px 0}.tl{font-size:12px;line-height:1.25}
+.blocks .b{font-size:14px;border-radius:6px}.mapx b{display:none}
+details.sub2>summary,.sub2.flat>summary{grid-template-columns:1fr auto}.rb{grid-column:1/3;order:3}
+}
+@media (max-width:820px) and (max-height:900px){.app{gap:5px;padding-top:6px}.verdict{font-size:13.5px;padding:5px 9px}.grid{gap:6px}.tl>span:nth-child(2){display:none}.mini,.mapx,.dots{flex-basis:30px;min-height:30px}.tn b{font-size:22px}}
+@media (max-width:820px) and (max-height:780px),(max-width:380px) and (max-height:830px){.verdict{font-size:12.5px;padding:4px 8px}.top5 h1{font-size:15px}.stamp{font-size:11.5px}.mini,.mapx,.dots{flex-basis:18px;min-height:18px}.tq{font-size:12px}.tn b{font-size:19px}.tl{font-size:11px}.go{width:20px;height:20px;font-size:14px}.t .face{padding:5px 7px;gap:1px}.grid{gap:5px}}
+
+.flt{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.grp{display:flex;align-items:center;gap:4px}.lab{font-size:12.5px;color:var(--muted);margin-right:2px}
+.pill{position:relative;cursor:pointer;padding:5px 12px;border:1px solid var(--ring);border-radius:999px;background:var(--surface);font-size:14px;white-space:nowrap}
+.pill input{position:absolute;opacity:0;pointer-events:none}
+.pill:has(input:checked){background:var(--s1);color:#fff;border-color:var(--s1)}
+.pill:has(input:focus-visible){outline:2px solid var(--gold)}
+select#cl{font:inherit;font-size:14px;padding:5px 10px;border-radius:999px;border:1px solid var(--ring);background:var(--surface);color:var(--ink);max-width:260px}
+.selw{display:flex;align-items:center;gap:6px}
+.hist{display:flex;gap:6px;align-items:stretch;flex:1 1 60px;min-height:60px;margin:4px 0}
+.hc{flex:1 1 0;display:flex;flex-direction:column;align-items:center;min-width:0}
+.hc em{font-style:normal;font-size:13px;font-weight:700;line-height:1.2}.hc u{text-decoration:none;font-size:11px;color:var(--muted);line-height:1.2}
+.hb{flex:1 1 0;position:relative;width:100%;min-height:8px;display:block}.hb i{position:absolute;left:0;right:0;bottom:0;background:var(--ctx);border-radius:3px 3px 0 0;min-height:2px}.hb i.g{background:var(--good)}
+.shr{display:block;flex:1 1 40px;min-height:40px;margin:4px 0;background:var(--grid);border-radius:8px;position:relative;overflow:hidden}.shr i{position:absolute;left:0;top:0;bottom:0;background:var(--s1)}
+.emp{display:flex;align-items:center;justify-content:center;flex:1 1 46px;min-height:46px;color:var(--muted);font-size:13px}
+.rb i.md2b{background:var(--critical)}
+@media (max-width:820px){.lab,.pl{display:none}.pill{padding:4px 8px;font-size:13px}select#cl{font-size:13px;padding:4px 8px;max-width:130px}.hc u{display:none}.flt{gap:4px 8px;flex-wrap:nowrap}.stamp{font-size:11.5px}.top5{gap:2px 8px}}
+@media (max-width:820px){.sf{display:none}.top5{flex-wrap:wrap}.top5 h1{white-space:nowrap;font-size:16px}.stamp{white-space:nowrap}.flt{width:100%}.tl>span:first-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.app{gap:5px}}
+@media (max-width:820px) and (max-height:780px){.hc em{font-size:11px}.tl>span:first-child{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.verdict{font-size:12.5px;padding:4px 8px}}
+#v1:checked~.grid>.t:not(.n1),#v2:checked~.grid>.t:not(.n2),#v3:checked~.grid>.t:not(.n3),#v4:checked~.grid>.t:not(.n4),#v5:checked~.grid>.t:not(.n5),#v6:checked~.grid>.t:not(.n6),#v7:checked~.grid>.t:not(.n7){display:none}
+#v1:checked~.grid,#v2:checked~.grid,#v3:checked~.grid,#v4:checked~.grid,#v5:checked~.grid,#v6:checked~.grid,#v7:checked~.grid{display:block}
+#v1:checked~.grid>.n1 .face{display:none}#v1:checked~.grid>.n1 .inner{display:block}#v1:checked~.verdict{display:none}
+#v2:checked~.grid>.n2 .face{display:none}#v2:checked~.grid>.n2 .inner{display:block}#v2:checked~.verdict{display:none}
+#v3:checked~.grid>.n3 .face{display:none}#v3:checked~.grid>.n3 .inner{display:block}#v3:checked~.verdict{display:none}
+#v4:checked~.grid>.n4 .face{display:none}#v4:checked~.grid>.n4 .inner{display:block}#v4:checked~.verdict{display:none}
+#v5:checked~.grid>.n5 .face{display:none}#v5:checked~.grid>.n5 .inner{display:block}#v5:checked~.verdict{display:none}
+#v6:checked~.grid>.n6 .face{display:none}#v6:checked~.grid>.n6 .inner{display:block}#v6:checked~.verdict{display:none}
+#v7:checked~.grid>.n7 .face{display:none}#v7:checked~.grid>.n7 .inner{display:block}#v7:checked~.verdict{display:none}
+</style></head><body><div class="app">
+<input type="radio" name="v" id="v0" class="pick" checked><input type="radio" name="v" id="v1" class="pick"><input type="radio" name="v" id="v2" class="pick"><input type="radio" name="v" id="v3" class="pick"><input type="radio" name="v" id="v4" class="pick"><input type="radio" name="v" id="v5" class="pick"><input type="radio" name="v" id="v6" class="pick"><input type="radio" name="v" id="v7" class="pick">
+<div class="top5"><h1>Бухфирма: счета и оплаты</h1><span class="stamp"><span class="sf">данные 1С на </span>07.10.2026<span class="sf"></span><span class="pl"> · <span id="plabel"></span></span></span>
+<div class="flt"><div class="grp"><span class="lab">Период</span><label class="pill"><input type="radio" name="per" value="1">Месяц</label><label class="pill"><input type="radio" name="per" value="3">Квартал</label><label class="pill"><input type="radio" name="per" value="6">Полгода</label><label class="pill"><input type="radio" name="per" value="0" checked>Всё</label></div>
+<label class="selw"><span class="lab">Клиент</span><select id="cl"><option value="">Все клиенты</option><option value="c004">ИП Алексеев Пётр Игоревич</option><option value="c005">ИП Борисов Антон Сергеевич</option><option value="c006">ИП Воронцова Мария Олеговна</option><option value="c012">ИП Громов Денис Павлович</option><option value="c003">ООО Альта-Строй</option><option value="c014">ООО Бриз</option><option value="c001">ООО Вектор-Сервис</option><option value="c017">ООО Грано</option><option value="c007">ООО Домовой</option><option value="c009">ООО Лотос</option><option value="c010">ООО Меридиан</option><option value="c018">ООО Орион-М</option><option value="c008">ООО Прогресс-Опт</option><option value="c015">ООО Рубин</option><option value="c002">ООО Северный путь</option><option value="c016">ООО Старт-Плюс</option><option value="c011">ООО Титан-Логистик</option><option value="c019">ООО Фаворит</option><option value="c013">ООО Эталон-Торг</option></select></label></div></div>
+<p class="verdict" id="verdict"></p>
+<div class="grid" id="grid"></div>
+<noscript><p class="verdict">Панели нужен включённый JavaScript: фильтры считают данные в странице.</p></noscript>
+</div><script>const DATA={"today": "2026-10-07", "inv": [{"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000001", "date": "2026-01-01", "sum": 3000.0, "paid": "2026-01-05"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000013", "date": "2026-02-01", "sum": 3000.0, "paid": "2026-02-02"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000025", "date": "2026-03-01", "sum": 3000.0, "paid": "2026-03-02"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000037", "date": "2026-04-01", "sum": 3000.0, "paid": "2026-04-02"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000049", "date": "2026-05-01", "sum": 3000.0, "paid": "2026-05-04"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000061", "date": "2026-06-01", "sum": 3000.0, "paid": "2026-06-01"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000075", "date": "2026-07-01", "sum": 3000.0, "paid": "2026-07-01"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000088", "date": "2026-08-01", "sum": 3000.0, "paid": "2026-08-04"}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "num": "ПВ00-000099", "date": "2026-09-01", "sum": 3000.0, "paid": "2026-09-02"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000002", "date": "2026-01-01", "sum": 21000.0, "paid": null}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000014", "date": "2026-02-01", "sum": 21000.0, "paid": "2026-01-30"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000026", "date": "2026-03-01", "sum": 21000.0, "paid": "2026-02-27"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000038", "date": "2026-04-01", "sum": 21000.0, "paid": "2026-03-30"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000050", "date": "2026-05-01", "sum": 21000.0, "paid": "2026-04-30"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000062", "date": "2026-06-01", "sum": 21000.0, "paid": "2026-05-29"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000076", "date": "2026-07-01", "sum": 21000.0, "paid": "2026-06-30"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000089", "date": "2026-08-01", "sum": 21000.0, "paid": "2026-07-31"}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "num": "ПВ00-000100", "date": "2026-09-01", "sum": 21000.0, "paid": "2026-08-31"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000003", "date": "2026-01-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000015", "date": "2026-02-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000027", "date": "2026-03-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000039", "date": "2026-04-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000052", "date": "2026-05-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000064", "date": "2026-06-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000073", "date": "2026-06-01", "sum": 24000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000078", "date": "2026-07-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000091", "date": "2026-08-01", "sum": 4000.0, "paid": "вне"}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "num": "ПВ00-000102", "date": "2026-09-01", "sum": 4000.0, "paid": null}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000004", "date": "2026-01-01", "sum": 15000.0, "paid": "2026-01-03"}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000017", "date": "2026-02-01", "sum": 15000.0, "paid": "2026-02-01"}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000030", "date": "2026-03-01", "sum": 15000.0, "paid": "2026-03-02"}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000042", "date": "2026-04-01", "sum": 7000.0, "paid": "2026-04-28"}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000055", "date": "2026-05-01", "sum": 7000.0, "paid": "2026-07-09"}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000067", "date": "2026-06-01", "sum": 7000.0, "paid": null}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "num": "ПВ00-000080", "date": "2026-07-01", "sum": 7000.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000005", "date": "2026-01-01", "sum": 22500.0, "paid": "2026-02-13"}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000018", "date": "2026-02-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000031", "date": "2026-03-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000043", "date": "2026-04-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000056", "date": "2026-05-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000068", "date": "2026-06-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000081", "date": "2026-07-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000093", "date": "2026-08-01", "sum": 22500.0, "paid": null}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "num": "ПВ00-000104", "date": "2026-09-01", "sum": 22500.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000109", "date": "2026-01-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000110", "date": "2026-02-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000111", "date": "2026-03-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000048", "date": "2026-04-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000057", "date": "2026-05-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000069", "date": "2026-06-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000082", "date": "2026-07-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000094", "date": "2026-08-01", "sum": 40000.0, "paid": null}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "num": "ПВ00-000105", "date": "2026-09-01", "sum": 40000.0, "paid": null}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000006", "date": "2026-01-01", "sum": 14000.0, "paid": "2026-01-03"}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000019", "date": "2026-02-01", "sum": 14000.0, "paid": "2026-02-02"}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000032", "date": "2026-03-01", "sum": 14000.0, "paid": "2026-03-02"}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000044", "date": "2026-04-01", "sum": 14000.0, "paid": null}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000058", "date": "2026-05-01", "sum": 14000.0, "paid": "2026-05-06"}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000070", "date": "2026-06-01", "sum": 14000.0, "paid": "2026-06-01"}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000083", "date": "2026-07-01", "sum": 14000.0, "paid": "2026-07-01"}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "num": "ПВ00-000095", "date": "2026-08-01", "sum": 14000.0, "paid": "2026-08-05"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000007", "date": "2026-01-01", "sum": 3000.0, "paid": "2026-01-12"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000020", "date": "2026-02-01", "sum": 3000.0, "paid": "2026-02-02"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000033", "date": "2026-03-01", "sum": 3000.0, "paid": "2026-03-02"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000045", "date": "2026-04-01", "sum": 3000.0, "paid": "2026-04-03"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000059", "date": "2026-05-01", "sum": 3000.0, "paid": "2026-05-04"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000071", "date": "2026-06-01", "sum": 3000.0, "paid": "2026-06-01"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000084", "date": "2026-07-01", "sum": 3000.0, "paid": "2026-07-06"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000096", "date": "2026-08-01", "sum": 3000.0, "paid": "2026-08-05"}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "num": "ПВ00-000107", "date": "2026-09-01", "sum": 3000.0, "paid": "2026-09-02"}, {"name": "ООО Лотос", "inn": "c009", "key": "c009", "num": "ПВ00-000008", "date": "2026-01-01", "sum": 3000.0, "paid": null}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000009", "date": "2026-01-01", "sum": 8000.0, "paid": "2025-12-29"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000021", "date": "2026-02-01", "sum": 8000.0, "paid": "2026-02-27"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000034", "date": "2026-03-01", "sum": 8000.0, "paid": "вне"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000046", "date": "2026-04-01", "sum": 8000.0, "paid": "2026-04-20"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000060", "date": "2026-05-01", "sum": 8000.0, "paid": "вне"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000072", "date": "2026-06-01", "sum": 8000.0, "paid": "вне"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000085", "date": "2026-07-01", "sum": 8000.0, "paid": "вне"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000097", "date": "2026-08-01", "sum": 8000.0, "paid": "вне"}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "num": "ПВ00-000108", "date": "2026-09-01", "sum": 8000.0, "paid": null}, {"name": "ООО Титан-Логистик", "inn": "c011", "key": "c011", "num": "ПВ00-000010", "date": "2026-01-01", "sum": 3000.0, "paid": "вне"}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "num": "ПВ00-000012", "date": "2026-01-01", "sum": 30000.0, "paid": "2026-01-05"}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "num": "ПВ00-000016", "date": "2026-02-01", "sum": 30000.0, "paid": "2026-02-01"}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "num": "ПВ00-000029", "date": "2026-03-01", "sum": 30000.0, "paid": "2026-03-02"}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "num": "ПВ00-000041", "date": "2026-04-01", "sum": 30000.0, "paid": "2026-04-01"}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "num": "ПВ00-000054", "date": "2026-05-01", "sum": 30000.0, "paid": "2026-05-02"}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "num": "ПВ00-000066", "date": "2026-06-01", "sum": 30000.0, "paid": "2026-06-01"}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000024", "date": "2026-02-01", "sum": 67000.0, "paid": null}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000028", "date": "2026-03-01", "sum": 20000.0, "paid": "2026-03-16"}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000040", "date": "2026-04-01", "sum": 20000.0, "paid": "2026-04-07"}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000053", "date": "2026-05-01", "sum": 25000.0, "paid": "2026-05-28"}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000065", "date": "2026-06-01", "sum": 25000.0, "paid": "2026-06-17"}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000079", "date": "2026-07-01", "sum": 25000.0, "paid": null}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000092", "date": "2026-08-01", "sum": 25000.0, "paid": null}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "num": "ПВ00-000103", "date": "2026-09-01", "sum": 25000.0, "paid": "2026-09-07"}, {"name": "ООО Бриз", "inn": "c014", "key": "c014", "num": "ПВ00-000036", "date": "2026-02-28", "sum": 26325.0, "paid": "2026-03-24"}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "num": "ПВ00-000047", "date": "2026-04-01", "sum": 15000.0, "paid": "2026-05-14"}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "num": "ПВ00-000051", "date": "2026-05-01", "sum": 15000.0, "paid": "2026-06-08"}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "num": "ПВ00-000063", "date": "2026-06-01", "sum": 15000.0, "paid": "2026-07-09"}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "num": "ПВ00-000077", "date": "2026-07-01", "sum": 15000.0, "paid": "2026-08-28"}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "num": "ПВ00-000090", "date": "2026-08-01", "sum": 15000.0, "paid": "2026-09-30"}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "num": "ПВ00-000101", "date": "2026-09-01", "sum": 15000.0, "paid": null}, {"name": "ООО Старт-Плюс", "inn": "c016", "key": "c016", "num": "ПВ00-000086", "date": "2026-06-01", "sum": 23060.0, "paid": "2026-07-02"}, {"name": "ООО Грано", "inn": "c017", "key": "c017", "num": "ПВ00-000074", "date": "2026-06-26", "sum": 21000.0, "paid": null}, {"name": "ООО Орион-М", "inn": "c018", "key": "c018", "num": "ПВ00-000087", "date": "2026-07-03", "sum": 70000.0, "paid": null}, {"name": "ООО Фаворит", "inn": "c019", "key": "c019", "num": "ПВ00-000098", "date": "2026-08-11", "sum": 18000.0, "paid": null}], "pay": [{"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "date": "2026-01-03", "sum": 15000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-01-03", "sum": 14000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-01-05", "sum": 3000.0}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "date": "2026-01-05", "sum": 30000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-01-12", "sum": 3000.0}, {"name": "ООО Кедр", "inn": "c020", "key": "c020", "date": "2026-01-13", "sum": 2000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-01-30", "sum": 21000.0}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "date": "2026-02-01", "sum": 15000.0}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "date": "2026-02-01", "sum": 30000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-02-02", "sum": 3000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-02-02", "sum": 3000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-02-02", "sum": 14000.0}, {"name": "ООО Магистраль", "inn": "c021", "key": "c021", "date": "2026-02-05", "sum": 24584.02}, {"name": "ИП Борисов Антон Сергеевич", "inn": "c005", "key": "c005", "date": "2026-02-13", "sum": 22500.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-02-26", "sum": 67000.0}, {"name": "ООО Меридиан", "inn": "c010", "key": "c010", "date": "2026-02-27", "sum": 8000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-02-27", "sum": 21000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-03-02", "sum": 14000.0}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "date": "2026-03-02", "sum": 30000.0}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "date": "2026-03-02", "sum": 15000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-03-02", "sum": 3000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-03-02", "sum": 3000.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-03-16", "sum": 20000.0}, {"name": "ООО Бриз", "inn": "c014", "key": "c014", "date": "2026-03-24", "sum": 26325.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-03-30", "sum": 21000.0}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "date": "2026-04-01", "sum": 30000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-04-02", "sum": 3000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-04-03", "sum": 3000.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-04-07", "sum": 20000.0}, {"name": "ООО Сигма-Групп", "inn": "c022", "key": "c022", "date": "2026-04-07", "sum": 9280.0}, {"name": "ООО Янтарь", "inn": "c023", "key": "c023", "date": "2026-04-20", "sum": 8000.0}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "date": "2026-04-21", "sum": 20000.0}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "date": "2026-04-28", "sum": 7000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-04-30", "sum": 21000.0}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "date": "2026-05-02", "sum": 30000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-05-04", "sum": 3000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-05-04", "sum": 3000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-05-06", "sum": 14000.0}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "date": "2026-05-14", "sum": 15000.0}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "date": "2026-05-22", "sum": 10000.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-05-28", "sum": 25000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-05-29", "sum": 21000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-06-01", "sum": 3000.0}, {"name": "ИП Громов Денис Павлович", "inn": "c012", "key": "c012", "date": "2026-06-01", "sum": 30000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-06-01", "sum": 14000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-06-01", "sum": 3000.0}, {"name": "ООО Альта-Строй", "inn": "c003", "key": "c003", "date": "2026-06-04", "sum": 24000.0}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "date": "2026-06-08", "sum": 15000.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-06-17", "sum": 25000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-06-30", "sum": 21000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-07-01", "sum": 3000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-07-01", "sum": 14000.0}, {"name": "ООО Старт-Плюс", "inn": "c016", "key": "c016", "date": "2026-07-02", "sum": 23060.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-07-06", "sum": 25000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-07-06", "sum": 3000.0}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "date": "2026-07-09", "sum": 15000.0}, {"name": "ИП Алексеев Пётр Игоревич", "inn": "c004", "key": "c004", "date": "2026-07-09", "sum": 7000.0}, {"name": "ООО Старт-Плюс", "inn": "c016", "key": "c016", "date": "2026-07-22", "sum": 23060.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-07-31", "sum": 21000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-08-04", "sum": 3000.0}, {"name": "ООО Домовой", "inn": "c007", "key": "c007", "date": "2026-08-05", "sum": 14000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-08-05", "sum": 3000.0}, {"name": "ООО Мастер-Дом", "inn": "c024", "key": "c024", "date": "2026-08-10", "sum": 3000.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-08-10", "sum": 25000.0}, {"name": "ООО Фаворит", "inn": "c019", "key": "c019", "date": "2026-08-12", "sum": 21000.0}, {"name": "ООО Норд-Транс", "inn": "c025", "key": "c025", "date": "2026-08-14", "sum": 30000.0}, {"name": "ООО Старт-Плюс", "inn": "c016", "key": "c016", "date": "2026-08-25", "sum": 23060.0}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "date": "2026-08-28", "sum": 15000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-08-31", "sum": 21000.0}, {"name": "ИП Воронцова Мария Олеговна", "inn": "c006", "key": "c006", "date": "2026-09-01", "sum": 10000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-09-02", "sum": 3000.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-09-02", "sum": 3000.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-09-07", "sum": 25000.0}, {"name": "ООО Рубин", "inn": "c015", "key": "c015", "date": "2026-09-30", "sum": 15000.0}, {"name": "ООО Северный путь", "inn": "c002", "key": "c002", "date": "2026-09-30", "sum": 21000.0}, {"name": "ООО Вектор-Сервис", "inn": "c001", "key": "c001", "date": "2026-10-01", "sum": 3000.0}, {"name": "ООО Старт-Плюс", "inn": "c016", "key": "c016", "date": "2026-10-01", "sum": 23060.0}, {"name": "ООО Прогресс-Опт", "inn": "c008", "key": "c008", "date": "2026-10-02", "sum": 3000.0}, {"name": "ООО Аква-Мир", "inn": "c026", "key": "c026", "date": "2026-10-02", "sum": 250.0}, {"name": "ООО Эталон-Торг", "inn": "c013", "key": "c013", "date": "2026-10-05", "sum": 25000.0}], "banks": [{"name": "Дорохов И. А. ИП", "inn": "c027", "key": "c027", "last": "2026-04-01"}, {"name": "Ершова Н. В. ИП", "inn": "c028", "key": "c028", "last": "2026-07-23"}, {"name": "ООО Колос", "inn": "c029", "key": "c029", "last": "2025-12-31"}, {"name": "Алексеев П. И. ИП", "inn": "c004", "key": "c004", "last": "2026-09-21"}, {"name": "Жуков А. Н. ИП", "inn": "c030", "key": "c030", "last": "2026-10-05"}, {"name": "Зайцева О. Р. ИП", "inn": "c031", "key": "c031", "last": "2026-03-06"}, {"name": "Исаев М. И. ИП", "inn": "c032", "key": "c032", "last": "2025-12-29"}, {"name": "Борисов А. С. ИП", "inn": "c005", "key": "c005", "last": "2026-03-02"}, {"name": "Крылов В. Л. ИП", "inn": "c033", "key": "c033", "last": "2026-01-19"}, {"name": "ООО Парус", "inn": "c034", "key": "c034", "last": "2025-04-24"}, {"name": "Воронцова М. О. ИП", "inn": "c006", "key": "c006", "last": "2026-10-01"}], "reminders": ["c004"], "excluded": {"orgs": 1, "inv": 4, "sum": 75000.0, "unpaid": 60000.0}};
+'use strict';
+const NB = ' ';
+const MON = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+const MONN = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+const MONG = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const m0 = x => Math.round(x).toLocaleString('ru-RU').replace(/[\s  ]/g, NB) + NB + '₽';
+const ms = x => x >= 1e6 ? (x / 1e6).toFixed(2).replace('.', ',') + ' млн' : Math.round(x / 1000) + ' тыс';
+const pc = (a, b) => b ? Math.round(a / b * 100) : 0;
+const dmy = s => s.slice(8, 10) + '.' + s.slice(5, 7) + '.' + s.slice(0, 4);
+const dd = (a, b) => Math.round((Date.UTC(+b.slice(0, 4), +b.slice(5, 7) - 1, +b.slice(8, 10)) - Date.UTC(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10))) / 864e5);
+const sum = (a, f) => a.reduce((s, x) => s + (f ? f(x) : x), 0);
+function short(n) {
+  n = n.trim();
+  if (n.startsWith('ИП ')) { const p = n.slice(3).split(/\s+/); return p[0] + (p.length > 1 ? ' ' + p.slice(1, 3).map(w => w[0] + '.').join('') : ''); }
+  n = n.replace(/(^|\s)(ООО|АО|ПАО|ЗАО)(?=$|\s)/g, ' ').replace(/["«»]/g, '');
+  return n.replace(/\s+/g, ' ').trim().replace(/^[ .]+|[ .]+$/g, '') || n;
+}
+function startFor(today, per) {
+  if (!per) return '0000-00-00';
+  let y = +today.slice(0, 4), m = +today.slice(5, 7) - per;
+  while (m <= 0) { m += 12; y--; }
+  return y + '-' + String(m).padStart(2, '0') + '-01';
+}
+const BK = [['в день счёта или раньше', '≤0', -99, 0], ['1-3 дня', '1-3', 1, 3], ['4-7 дней', '4-7', 4, 7], ['8-14 дней', '8-14', 8, 14], ['15-30 дней', '15-30', 15, 30], ['больше 30 дней', '30+', 31, 999]];
+const DB = [['1-5', 1, 5], ['6-10', 6, 10], ['11-15', 11, 15], ['16-20', 16, 20], ['21-25', 21, 25], ['26-31', 26, 31]];
+const groupBy = (arr, f) => { const m = new Map(); for (const x of arr) { const k = f(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); } return m; };
+
+function compute(D, per, client) {
+  const today = D.today, start = startFor(today, per);
+  const Ip = D.inv.filter(r => r.date >= start);
+  const Ic = Ip.filter(r => !client || r.key === client);
+  const Iall = D.inv.filter(r => !client || r.key === client);
+  const M = { today, start, per, client, I: Ic };
+  M.total = sum(Ic, r => r.sum);
+  const unp = Ic.filter(r => r.paid === null), man = Ic.filter(r => r.paid === 'вне'), st = Ic.filter(r => r.paid !== null && r.paid !== 'вне');
+  M.unpaid = sum(unp, r => r.sum); M.manual = sum(man, r => r.sum); M.stmt = sum(st, r => r.sum);
+  M.paidPct = pc(M.total - M.unpaid, M.total);
+  // месяцы
+  const months = [...new Set(Ic.map(r => r.date.slice(0, 7)))].sort();
+  M.months = months; M.mon = {};
+  for (const k of months) M.mon[k] = { tot: 0, st: 0, man: 0, un: 0, n: 0 };
+  for (const r of Ic) { const m = M.mon[r.date.slice(0, 7)]; m.tot += r.sum; m.n++; m[r.paid === null ? 'un' : (r.paid === 'вне' ? 'man' : 'st')] += r.sum; }
+  const ml = [...new Set(Iall.map(r => r.date.slice(0, 7)))].sort();
+  const agg = k => { const l = Iall.filter(r => r.date.slice(0, 7) === k); return { tot: sum(l, r => r.sum), n: l.length }; };
+  M.lastM = ml[ml.length - 1]; M.last = ml.length ? agg(M.lastM) : { tot: 0, n: 0 };
+  M.dLast = ml.length > 1 ? Math.round((M.last.tot / agg(ml[ml.length - 2]).tot - 1) * 100) : null;
+  const base = ml.slice(0, -1);
+  M.avgN = base.length >= 2 ? sum(base, k => agg(k).n) / base.length : null;
+  M.avgSum = base.length >= 2 ? sum(base, k => agg(k).tot) / base.length : null;
+  // долги
+  M.debt = [...groupBy(unp, r => r.name)].map(([name, l]) => {
+    const oldest = l.map(r => r.date.slice(0, 7) + '-01').sort()[0];
+    return { name, inn: l[0].inn, sum: sum(l, r => r.sum), inv: l.slice().sort((a, b) => a.date < b.date ? -1 : 1), age: dd(oldest, today) };
+  }).sort((a, b) => b.sum - a.sum);
+  M.old = M.debt.filter(d => d.age > 180); M.oldSum = sum(M.old, d => d.sum);
+  M.top3 = sum(M.debt.slice(0, 3), d => d.sum);
+  const rem = new Set(D.reminders);
+  M.remCount = M.debt.filter(d => rem.has(d.inn)).length;
+  // концентрация (по всем клиентам периода)
+  M.cl = [...groupBy(Ip, r => r.name)].map(([n, l]) => [n, sum(l, r => r.sum), l[0].key]).sort((a, b) => b[1] - a[1]);
+  M.totalAll = sum(Ip, r => r.sum);
+  let cum = 0; M.n80 = 0;
+  for (let i = 0; i < M.cl.length; i++) { cum += M.cl[i][1]; if (cum >= 0.8 * M.totalAll) { M.n80 = i + 1; break; } }
+  const dn = new Set(M.debt.map(d => d.name));
+  M.top80Debt = M.cl.slice(0, M.n80).filter(c => dn.has(c[0])).length;
+  M.rank = client ? M.cl.findIndex(c => c[2] === client) + 1 : 0;
+  // скорость оплаты
+  M.lags = st.map(r => [dd(r.date, r.paid), r]);
+  const vals = M.lags.map(x => x[0]).sort((a, b) => a - b), n = vals.length;
+  M.median = n ? (n % 2 ? vals[(n - 1) / 2] : (vals[n / 2 - 1] + vals[n / 2]) / 2) : null;
+  M.hist = BK.map(b => { const l = M.lags.filter(x => x[0] >= b[2] && x[0] <= b[3]); return { n: l.length, sum: sum(l, x => x[1].sum), items: l.map(x => x[1]).sort((a, b) => b.sum - a.sum) }; });
+  M.lagN = n; M.lagSum = sum(st, r => r.sum);
+  M.slow = M.hist[5];
+  // платежи
+  const P = D.pay.filter(p => p.date >= start && (!client || p.key === client));
+  M.pm = {}; for (const p of P) M.pm[p.date] = (M.pm[p.date] || 0) + p.sum;
+  M.payTotal = sum(P, p => p.sum); M.payN = P.length;
+  M.dsum = DB.map(b => sum(P.filter(p => +p.date.slice(8, 10) >= b[1] && +p.date.slice(8, 10) <= b[2]), p => p.sum));
+  M.dcnt = DB.map(b => P.filter(p => +p.date.slice(8, 10) >= b[1] && +p.date.slice(8, 10) <= b[2]).length);
+  M.best = M.payTotal ? M.dsum.indexOf(Math.max(...M.dsum)) : -1;
+  M.worst = M.payTotal ? M.dsum.indexOf(Math.min(...M.dsum)) : -1;
+  M.payMonths = [...new Set(P.map(p => p.date.slice(0, 7)))].sort();
+  // банк (по организациям, активным в базе)
+  M.banks = D.banks.filter(b => !client || b.key === client).map(b => Object.assign({}, b, { age: b.last ? dd(b.last, today) : null }));
+  M.bActive = M.banks.filter(b => b.age !== null && b.age <= 90); M.bSilent = M.banks.filter(b => !(b.age !== null && b.age <= 90));
+  // вопросы
+  const Q = []; const q3 = M.debt.slice(0, 3);
+  if (M.debt.length) Q.push(['crit', q3.length > 1 ? `Сверить оплату у ${q3.length === 3 ? 'трёх' : 'двух'} крупнейших: ${ms(M.top3)} ₽ (${pc(M.top3, M.unpaid)}% долга)` : `Сверить оплату: ${short(q3[0].name)}, ${ms(q3[0].sum)} ₽`,
+    q3.map(d => short(d.name) + ' ' + ms(d.sum)).join(', ') + '. В выписках 1С оплаты нет.',
+    'Спросить, не платили ли зачётом, наличными или с другого счёта. Если платили: добавить месяцы в «оплачено вне выписок». Если нет: напомнить.', 'оплата крупнейших']);
+  if (M.old.length) Q.push(['crit', `Старые долги: ${M.old.length} клиентов на ${ms(M.oldSum)} ₽ старше 180 дней`,
+    'Самый старый счёт старше полугода: ' + M.old.slice(0, 4).map(d => `${short(d.name)} (${d.age} дн.)`).join(', ') + (M.old.length > 4 ? '...' : '.'),
+    'По каждому решить: напомнить письмом, приостановить услугу или списать. Решение за вами, ничего не отправлено.', 'старые долги']);
+  if (M.avgN !== null && (M.last.n <= M.avgN * 0.8 || M.last.tot <= M.avgSum * 0.8)) Q.push(['warn', `${MONN[+M.lastM.slice(5) - 1]} слабее: ${M.last.n} счетов против обычных ${Math.round(M.avgN)}`,
+    `Выставлено ${ms(M.last.tot)} ₽ против среднего ${ms(M.avgSum)} ₽ за предыдущие месяцы.`, 'Проверить, всем ли постоянным клиентам выставлен счёт за последний месяц.', 'слабый месяц']);
+  if (M.debt.length && M.remCount < M.debt.length) Q.push(['warn', `Напоминания включены у ${M.remCount} из ${M.debt.length} должников`,
+    'Автоматическое напоминание 5-го числа включено только у части должников. У остальных долг молчит.', 'Решить, по кому включить напоминания. Включение отдельное решение, сейчас не менялось.', 'напоминания']);
+  if (M.banks.length && M.bSilent.length) Q.push(['warn', `Банк в 1С без операций больше 90 дней у ${M.bSilent.length} из ${M.banks.length} организаций`,
+    'Либо организация не ведётся, либо выписки не загружают: по данным 1С не отличить.', 'Проверить, у кого выписки должны быть. У остальных вопрос снимется.', 'банк']);
+  M.Q = Q;
+  return M;
+}
+if (typeof module !== 'undefined') module.exports = { compute, short, ms, m0, startFor };
+
+function squarify(vals, x, y, w, h) {
+  const s = sum(vals), areas = vals.map(v => v * w * h / s), out = []; let i = 0;
+  const worst = (row, side) => { const t = sum(row); return Math.max(...row.map(r => Math.max(side * side * r / (t * t), t * t / (side * side * r)))); };
+  while (i < areas.length) {
+    const side = Math.min(w, h); let row = [areas[i]], j = i + 1;
+    while (j < areas.length && worst(row.concat([areas[j]]), side) <= worst(row, side)) { row.push(areas[j]); j++; }
+    const t = sum(row);
+    if (w >= h) { const cw = t / h; let yy = y; for (const a of row) { const ch = a / cw; out.push([x, yy, cw, ch]); yy += ch; } x += cw; w -= cw; }
+    else { const rh = t / w; let xx = x; for (const a of row) { const cw = a / rh; out.push([xx, y, cw, rh]); xx += cw; } y += rh; h -= rh; }
+    i = j;
+  }
+  return out;
+}
+const agecls = a => a > 180 ? 'md2' : (a > 90 ? 'wa' : 'mf');
+const pl = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return n + ' ' + (a > 10 && a < 20 ? f[2] : b === 1 ? f[0] : b > 1 && b < 5 ? f[1] : f[2]); };
+const empty = t => `<span class="emp">${t}</span>`;
+function treemap(debt) {
+  if (!debt.length) return empty('долгов нет');
+  const rs = squarify(debt.map(d => d.sum), 0, 0, 100, 60);
+  return '<span class="mapx">' + debt.map((d, i) => { const [x, y, w, h] = rs[i];
+    const lab = w > 14 && h > 18 ? `<b>${esc(short(d.name))}<br>${ms(d.sum)}</b>` : '';
+    return `<i class="${agecls(d.age)}" style="left:${x.toFixed(2)}%;top:${(y / 60 * 100).toFixed(2)}%;width:${w.toFixed(2)}%;height:${(h / 60 * 100).toFixed(2)}%" title="${esc(d.name)}: ${m0(d.sum)}, ${d.age} дн.">${lab}</i>`; }).join('') + '</span>';
+}
+function stackedMonths(M) {
+  if (!M.months.length) return empty('счетов нет');
+  const mx = Math.max(...M.months.map(k => M.mon[k].tot)), n = M.months.length, slots = Math.max(n, 5), w = 100 / slots, off = (slots - n) * w / 2; let o = '';
+  M.months.forEach((k, i) => { let y = 100; const m = M.mon[k];
+    for (const [key, cls] of [['st', 'g'], ['man', 'c'], ['un', 'r']]) { const h = m[key] / mx * 96; if (h > 0) { y -= h; o += `<rect x="${(off + i * w + w * .12).toFixed(2)}" y="${y.toFixed(2)}" width="${(w * .76).toFixed(2)}" height="${h.toFixed(2)}" class="${cls}"><title>${MON[+k.slice(5) - 1]}</title></rect>`; } } });
+  return `<svg class="mini" viewBox="0 0 100 100" preserveAspectRatio="none">${o}</svg>`;
+}
+function heatLevels(M) { const nz = Object.values(M.pm).filter(v => v > 0).sort((a, b) => a - b); return v => v <= 0 ? 0 : 1 + Math.min(4, Math.floor(5 * nz.indexOf(v) / nz.length)); }
+function heatSvg(M) {
+  if (!M.payMonths.length) return empty('платежей нет');
+  const lvl = heatLevels(M); let o = '';
+  M.payMonths.forEach((mk, ri) => { for (let d = 1; d <= 31; d++) { const key = mk + '-' + String(d).padStart(2, '0'), v = M.pm[key] || 0;
+    o += `<rect x="${(d - 1) * 10 + .6}" y="${ri * 10 + .6}" width="8.8" height="8.8" class="h${lvl(v)}"><title>${v ? dmy(key) + ': ' + m0(v) : key}</title></rect>`; } });
+  return `<svg class="mini" viewBox="0 0 310 ${M.payMonths.length * 10}" preserveAspectRatio="none">${o}</svg>`;
+}
+function pareto(M) {
+  const n = M.cl.length; if (!n) return empty('нет данных');
+  const pts = ['0,100']; let c = 0;
+  M.cl.forEach((x, i) => { c += x[1]; pts.push(`${((i + 1) / n * 100).toFixed(2)},${(100 - c / M.totalAll * 98).toFixed(2)}`); });
+  const x80 = M.n80 / n * 100;
+  return `<svg class="mini" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="${pts.join(' ')} 100,100" class="pa"/><polyline points="${pts.join(' ')}" class="pl"/><line x1="0" y1="${(100 - .8 * 98).toFixed(1)}" x2="100" y2="${(100 - .8 * 98).toFixed(1)}" class="dsh"/><line x1="${x80.toFixed(1)}" y1="0" x2="${x80.toFixed(1)}" y2="100" class="dsh"/></svg>`;
+}
+function shareBar(M) { const p = pc(M.total, M.totalAll); return `<span class="shr"><i style="width:${Math.max(p, 2)}%"></i></span>`; }
+function histHtml(M) {
+  if (!M.lagN) return empty('оплат в выписках нет');
+  const mx = Math.max(...M.hist.map(h => h.n));
+  const mi = M.hist.findIndex((h, i) => M.median >= BK[i][2] && M.median <= BK[i][3]);
+  return '<span class="hist">' + M.hist.map((h, i) => `<span class="hc" title="${BK[i][0]}: ${h.n} счетов, ${m0(h.sum)}"><em>${h.n}</em><b class="hb"><i class="${i === mi ? 'g' : ''}" style="height:${Math.max(h.n / mx * 100, h.n ? 4 : 0)}%"></i></b><u>${BK[i][1]}</u></span>`).join('') + '</span>';
+}
+function dots(M) {
+  if (!M.banks.length) return empty('нет организации в базе');
+  const g = [['ok', b => b.age !== null && b.age <= 20], ['mid', b => b.age !== null && b.age > 20 && b.age <= 90], ['old', b => b.age !== null && b.age > 90], ['no', b => b.age === null]];
+  return '<span class="dots">' + g.map(([cls, f]) => { const it = M.banks.filter(f); if (!it.length) return '';
+    return `<span class="dg" style="flex:${it.length} 1 0">` + it.map(b => `<i class="dt ${cls}" title="${esc(b.name)}: ${b.last ? dmy(b.last) : 'операций нет'}"></i>`).join('') + '</span>'; }).join('') + '</span>';
+}
+const blocks = Q => '<span class="mini blocks">' + (Q.length ? Q.map((q, i) => `<i class="b ${q[0]}">${i + 1}</i>`).join('') : '<i class="b ok">✓</i>') + '</span>';
+
+function tile(k, st, q, big, unit, arrow, arcls, viz, l1, l2) {
+  const ar = arrow ? `<em class="ar ${arcls}">${arrow}</em>` : '';
+  return `<div class="t n${k} s-${st}"><label for="v${k}" class="face"><span class="tq">${q}<em class="go">›</em></span><span class="tn"><b>${big}</b><small>${unit}</small>${ar}</span>${viz}<span class="tl"><span>${l1}</span><span>${l2}</span></span></label>%%${k}%%</div>`;
+}
+const back = () => '<label for="v0" class="back">‹ К панели</label>';
+function row(name, bar, val, inner) {
+  const s = `<summary><span class="rn">${esc(name)}</span><span class="rb"><i style="width:${bar.toFixed(1)}%"></i></span><span class="rv">${val}</span></summary>`;
+  return inner ? `<details class="sub2">${s}<div class="inner">${inner}</div></details>` : `<div class="sub2 flat">${s}</div>`;
+}
+const statusTxt = r => r.paid === null ? 'не найдена' : (r.paid === 'вне' ? 'вне выписок' : 'оплачен ' + dmy(r.paid));
+const invTable = l => '<table><tr><th>№</th><th>Дата</th><th class="r">Сумма</th><th>Статус</th></tr>' + l.map(r => `<tr><td>${esc(r.num)}</td><td>${dmy(r.date)}</td><td class="r">${m0(r.sum)}</td><td>${statusTxt(r)}</td></tr>`).join('') + '</table>';
+const NOTE_EXC = D => D.excluded.orgs ? `<p class="mut">Не учтены организации, помеченные в базе как неактуальные (в архиве или закрыты): ${D.excluded.orgs} шт., ${D.excluded.inv} счетов на ${m0(D.excluded.sum)}, из них без оплаты ${m0(D.excluded.unpaid)}.</p>` : '';
+
+function render(D, per, client) {
+  const M = compute(D, per, client), Q = M.Q, cl1 = !!client;
+  const med = M.median === null ? '-' : String(M.median).replace('.', ',');
+  const T = [];
+  const d = M.dLast;
+  T.push(tile(1, M.unpaid > 0 ? 'amb' : 'grn', 'Сколько выставили', M.total ? ms(M.total) : '0', '₽', d === null ? '' : (d === 0 ? '→ 0%' : `${d < 0 ? '▼' : '▲'} ${d > 0 ? '+' : ''}${d}%`), d === null || d === 0 ? 'flat' : (d < 0 ? 'warn' : 'good'), stackedMonths(M),
+    M.total ? `оплата найдена у ${M.paidPct}%, не найдена у ${100 - M.paidPct}%` : 'за период счетов нет', `${pl(M.I.length, ['счёт', 'счёта', 'счетов'])}; стрелка: последний месяц к предыдущему`));
+  T.push(tile(2, Q.some(q => q[0] === 'crit') ? 'red' : (Q.length ? 'amb' : 'grn'), 'Что проверить', Q.length || '0', pl(Q.length, ['вопрос', 'вопроса', 'вопросов']).replace(/^\d+ /, ''), '', '', blocks(Q),
+    Q.length ? `<b class="urg">${Q[0][0] === 'crit' ? 'срочно:' : 'проверить:'}</b> ${esc(Q[0][1])}` : 'вопросов нет', Q.length > 1 ? `ещё ${Q.length - 1}: ` + Q.slice(1).map(q => q[4]).join(', ') : ''));
+  T.push(tile(3, M.debt.length ? 'red' : 'grn', 'Кто не платит', M.unpaid ? ms(M.unpaid) : '0', '₽', M.debt.length ? pl(M.debt.length, ['клиент', 'клиента', 'клиентов']) : '', 'bad', treemap(M.debt),
+    M.debt.length ? (M.debt.length >= 3 ? `три крупнейших: ${pc(M.top3, M.unpaid)}% долга` : `крупнейший: ${esc(short(M.debt[0].name))}, ${ms(M.debt[0].sum)} ₽`) : 'оплата найдена по всем счетам', M.old.length ? `старше 180 дней: ${ms(M.oldSum)} ₽ (${pl(M.old.length, ['клиент', 'клиента', 'клиентов'])})` : (M.debt.length ? 'старше 180 дней: нет' : '')));
+  const bi = M.best;
+  T.push(tile(4, 'neu', 'Когда платят', bi >= 0 ? `${DB[bi][0]} числа` : '-', '', bi >= 0 ? pc(M.dsum[bi], M.payTotal) + '%' : '', 'flat', heatSvg(M),
+    bi >= 0 ? `${pc(M.dsum[bi], M.payTotal)}% поступлений (${M.payN} платежей) в эти дни` : 'платежей за период нет', bi >= 0 ? `тише всего ${DB[M.worst][0]} числа: ${pc(M.dsum[M.worst], M.payTotal)}%` : ''));
+  if (cl1) {
+    T.push(tile(5, 'neu', 'Доля в выручке', pc(M.total, M.totalAll) + '%', 'от всей', M.rank ? `№${M.rank}` : '', 'flat', shareBar(M),
+      `${ms(M.total)} ₽ из ${ms(M.totalAll)} ₽ за период`, M.rank ? `место ${M.rank} из ${M.cl.length} клиентов` : ''));
+  } else {
+    T.push(tile(5, 'neu', 'Кто даёт выручку', M.n80 || '-', M.cl.length ? `из ${M.cl.length} дают 80%` : '', M.cl.length ? `№1: ${pc(M.cl[0][1], M.totalAll)}%` : '', 'flat', pareto(M),
+      M.cl.length ? `крупнейший: ${esc(short(M.cl[0][0]))}, ${ms(M.cl[0][1])} ₽` : 'нет данных', M.cl.length ? `из этих ${M.n80} без оплаты по счетам: ${M.top80Debt}` : ''));
+  }
+  T.push(tile(6, M.median !== null && M.median <= 7 ? 'grn' : 'amb', 'Как быстро платят', med, 'дн. типично', '', '', histHtml(M),
+    M.lagN ? `по ${pl(M.lagN, ['счёту', 'счетам', 'счетам'])} на ${ms(M.lagSum)} ₽; над столбиками - число счетов` : 'оплат по выпискам за период нет', M.lagN ? `дольше 30 дней: ${pl(M.slow.n, ['счёт', 'счёта', 'счетов'])} на ${ms(M.slow.sum)} ₽` : ''));
+  T.push(tile(7, M.bSilent.length ? 'amb' : 'grn', 'Банк в 1С свежий', `${M.bActive.length} из ${M.banks.length}`, 'орг.', M.bSilent.length ? `▼ ${M.bSilent.length} молчат` : '', 'warn', dots(M),
+    'квадрат - организация: зелёный до 20 дней, жёлтый до 90', `без операций больше 90 дней: ${M.bSilent.length}`));
+  // раскрытия
+  let i1 = '<p class="cap">По месяцам: сколько выставлено и как оплачено. Нажмите месяц, чтобы увидеть счета.</p>';
+  const mx1 = Math.max(1, ...M.months.map(k => M.mon[k].tot));
+  for (const k of M.months) { const m = M.mon[k];
+    const segs = [['st', 'g'], ['man', 'c'], ['un', 'r']].filter(([key]) => m[key] > 0).map(([key, c]) => `<i class="${c}" style="width:${m[key] / mx1 * 100}%"></i>`).join('');
+    const lst = M.I.filter(r => r.date.slice(0, 7) === k).sort((a, b) => b.sum - a.sum);
+    i1 += `<details class="sub2"><summary><span class="rn">${MON[+k.slice(5) - 1]} ${k.slice(0, 4)}</span><span class="rb stk">${segs}</span><span class="rv">${ms(m.tot)}</span></summary><div class="inner"><p class="note">${m.n} счетов; оплачено по выписке ${m0(m.st)}, вне выписок ${m0(m.man)}, не найдено ${m0(m.un)}.</p>${invTable(lst)}</div></details>`; }
+  i1 += '<p class="lg"><span><i class="g"></i>оплата в выписке</span><span><i class="c"></i>подтверждено вручную</span><span><i class="r"></i>не найдена</span></p>';
+  let i2 = '<p class="cap">Что стоит проверить по порядку важности. В каждом есть что видим и что сделать.</p>';
+  i2 += Q.length ? Q.map(q => `<details class="sub"><summary><span class="badge ${q[0]}">${q[0] === 'crit' ? 'срочно' : 'проверить'}</span>${esc(q[1])}</summary><div class="inner"><p><b>Что видим:</b> ${esc(q[2])}</p><p><b>Что сделать:</b> ${esc(q[3])}</p></div></details>`).join('') : '<p class="note">Вопросов нет.</p>';
+  let i3 = '<p class="cap">Кому и сколько не найдено в выписках. Цвет: красный старше 180 дней, жёлтый 90-180, серый свежее. Нажмите клиента: счета.</p>';
+  for (const x of M.debt) i3 += `<details class="sub2"><summary><span class="rn">${esc(x.name)}</span><span class="rb"><i class="${agecls(x.age)}b" style="width:${(x.sum / M.debt[0].sum * 100).toFixed(1)}%"></i></span><span class="rv">${ms(x.sum)}</span></summary><div class="inner"><p class="note">Самый старый счёт ${x.age} дн. ${x.inv.length} шт. на ${m0(x.sum)}.</p>${invTable(x.inv)}</div></details>`;
+  if (!M.debt.length) i3 += '<p class="note">Долгов за период нет.</p>';
+  i3 += '<p class="mut">Оплата наличными, зачётом или мимо выписок 1С здесь не видна. Дни считаются от начала месяца самого старого счёта.</p>' + NOTE_EXC(D);
+  let i4 = '<p class="cap">Календарь поступлений на расчётный счёт: строка - месяц, клетка - день, чем темнее, тем больше денег.</p>';
+  if (M.payMonths.length) { const lvl = heatLevels(M);
+    i4 += '<table class="cal"><tr><th></th>' + Array.from({ length: 31 }, (_, k) => `<th class="dn">${(k + 1) % 5 === 1 || k === 30 ? k + 1 : ''}</th>`).join('') + '</tr>' +
+      M.payMonths.map(mk => `<tr><th>${MON[+mk.slice(5) - 1]}</th>` + Array.from({ length: 31 }, (_, k) => { const key = mk + '-' + String(k + 1).padStart(2, '0'), v = M.pm[key] || 0; return `<td class="h${lvl(v)}" title="${key}: ${m0(v)}"></td>`; }).join('') + '</tr>').join('') + '</table>' +
+      '<table><tr><th>Дни месяца</th><th class="r">Платежей</th><th class="r">Сумма</th><th class="r">Доля</th></tr>' + DB.map((b, k) => `<tr><td>${b[0]}</td><td class="r">${M.dcnt[k]}</td><td class="r">${m0(M.dsum[k])}</td><td class="r">${pc(M.dsum[k], M.payTotal)}%</td></tr>`).join('') + '</table>';
+  } else i4 += '<p class="note">Платежей за период нет.</p>';
+  let i5;
+  if (cl1) {
+    i5 = `<p class="cap">Доля клиента среди всех клиентов за период.</p>` + M.cl.map(c => row(short(c[0]), c[1] / M.cl[0][1] * 100, pc(c[1], M.totalAll) + '%')).join('');
+  } else {
+    i5 = `<p class="cap">Сколько выставлено каждому клиенту за период. Крупнейшие ${M.n80} из ${M.cl.length} дают 80% суммы. Нажмите клиента: что неоплачено.</p>`; let cum = 0;
+    for (const [n, s, key] of M.cl) { cum += s; const l = M.I.filter(r => r.name === n), u = l.filter(r => r.paid === null);
+      i5 += row(short(n), s / M.cl[0][1] * 100, pc(s, M.totalAll) + '%', `<p class="note">Выставлено ${l.length} счетов на ${m0(s)}; не найдена оплата: ${m0(sum(u, r => r.sum))}. Накопительно ${pc(cum, M.totalAll)}%.</p>` + (u.length ? invTable(u) : '')); }
+  }
+  let i6 = '<p class="cap">Сколько дней проходит от выставления счёта до оплаты. В срез входят только счета, оплата которых найдена в выписках 1С (а не все выставленные). Для каждого срока: сколько счетов и на какую сумму. Нажмите срок: самые крупные счета.</p>';
+  if (M.lagN) { const mxh = Math.max(...M.hist.map(h => h.n));
+    i6 += `<p class="note">Всего оплачено по выпискам: ${M.lagN} счетов на ${m0(M.lagSum)}. Типичный срок (медиана): ${med} дн.</p>`;
+    M.hist.forEach((h, k) => { i6 += row(BK[k][0], h.n / mxh * 100, `${h.n} сч. · ${ms(h.sum)} ₽`, h.n ? '<table><tr><th>Клиент</th><th>Счёт</th><th>Оплата</th><th class="r">Сумма</th></tr>' + h.items.slice(0, 12).map(r => `<tr><td>${esc(short(r.name))}</td><td>${dmy(r.date)}</td><td>${dmy(r.paid)}</td><td class="r">${m0(r.sum)}</td></tr>`).join('') + '</table>' : ''); });
+  } else i6 += '<p class="note">За период оплат по выпискам нет.</p>';
+  let i7 = '<p class="cap">Дата последней банковской операции в 1С по каждой организации. Норма: не старше 20 дней. Организации в архиве не показаны.</p>';
+  i7 += M.banks.length ? '<table><tr><th>Организация</th><th>Последняя операция</th><th class="r">Дней</th></tr>' + M.banks.slice().sort((a, b) => (a.age === null) - (b.age === null) || (a.age || 0) - (b.age || 0)).map(b => `<tr class="${b.age !== null && b.age <= 20 ? '' : 'dim'}"><td>${esc(b.name)}</td><td>${b.last ? dmy(b.last) : 'нет'}</td><td class="r">${b.age !== null ? b.age : '-'}</td></tr>`).join('') + '</table><p class="mut">Организации без операций больше 90 дней могут не вестись; по данным 1С не отличить от незагруженных выписок.</p>' : '<p class="note">Выбранного клиента нет среди организаций в базе (банк не ведётся здесь).</p>';
+  i7 += NOTE_EXC(D);
+  const INN = [['Сколько выставили', i1], ['Что проверить', i2], ['Кто не платит', i3], ['Когда платят', i4], [cl1 ? 'Доля в выручке' : 'Кто даёт выручку', i5], ['Как быстро платят', i6], ['Банк в 1С', i7]];
+  let body = T.join('');
+  INN.forEach(([t, c], k) => { body = body.replace(`%%${k + 1}%%`, `<div class="inner">${back()}<h2>${t}</h2>${c}</div>`); });
+  // строка-вывод
+  let v;
+  if (!M.total) v = 'За выбранный период счетов нет';
+  else if (!M.debt.length) v = `Оплата найдена по всем счетам за период (${ms(M.total)} ₽)`;
+  else v = `Оплата не найдена на ${ms(M.unpaid)} ₽ (${100 - M.paidPct}%); ${M.old.length ? ms(M.oldSum) + ' старше полугода. ' : ''}<b>Главное:</b> ${M.debt.length > 1 ? 'сверить крупнейших' : 'сверить оплату'}`;
+  return { body, verdict: v, M };
+}
+function periodLabel(D, per) {
+  const s = startFor(D.today, per === 0 ? 0 : per); const first = D.inv.reduce((a, r) => r.date < a ? r.date : a, '9999');
+  const f = per ? s : first.slice(0, 7) + '-01';
+  return `с 1 ${MONG[+f.slice(5, 7) - 1]} ${f.slice(0, 4)} по ${+D.today.slice(8)} ${MONG[+D.today.slice(5, 7) - 1]}`;
+}
+function boot() {
+  let per = 0, client = '';
+  const hp = new URLSearchParams(location.hash.slice(1));
+  if (hp.has('per')) { per = +hp.get('per'); document.querySelectorAll('input[name=per]').forEach(e => { e.checked = +e.value === per; }); }
+  if (hp.has('cl')) { client = hp.get('cl'); document.getElementById('cl').value = client; }
+  const grid = document.getElementById('grid'), vd = document.getElementById('verdict'), pl = document.getElementById('plabel');
+  const go = () => { const r = render(DATA, per, client); grid.innerHTML = r.body; vd.innerHTML = r.verdict; pl.textContent = periodLabel(DATA, per); };
+  document.querySelectorAll('input[name=per]').forEach(el => el.addEventListener('change', () => { per = +el.value; go(); }));
+  document.getElementById('cl').addEventListener('change', e => { client = e.target.value; go(); });
+  go();
+}
+if (typeof document !== 'undefined') boot();
+</script></body></html>
